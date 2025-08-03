@@ -1,0 +1,12 @@
+{
+  "name": "vite_react_shadcn_ts",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
