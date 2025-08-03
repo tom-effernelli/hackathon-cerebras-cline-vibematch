@@ -11,6 +11,10 @@
 
 Developed during the **Cerebras x Cline Hackathon** by **Paul Archer** and **Tom Effernelli**.
 
+Check out the video demo:
+
+https://github.com/user-attachments/assets/8d731038-a078-4628-867a-c1bdb1700f8e
+
 ---
 
 ## About
