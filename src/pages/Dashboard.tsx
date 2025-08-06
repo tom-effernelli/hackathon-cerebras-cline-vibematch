@@ -13,6 +13,11 @@ import { CampaignManager } from '@/components/dashboard/CampaignManager';
 import { CreatorAnalytics } from '@/components/dashboard/CreatorAnalytics';
 import { NotificationCenter } from '@/components/dashboard/NotificationCenter';
 import { MessageCenter } from '@/components/dashboard/MessageCenter';
+import { useDemoAuth } from '@/hooks/useDemoAuth';
+import { DemoOverlay } from '@/components/demo/DemoOverlay';
+import { useDemo } from '@/contexts/DemoContext';
+import { useDemoInteractions } from '@/hooks/useDemoInteractions';
+import { useEffect } from 'react';
 
 const creatorStats = [
   { title: 'AI Matches', value: '42', change: '+12%', icon: Sparkles },
@@ -30,6 +35,25 @@ const sponsorStats = [
 
 export default function Dashboard() {
   const { profile } = useAuth();
+  const { demoState, setPhase } = useDemo();
+  useDemoAuth(); // Initialize demo auth handling
+  useDemoInteractions(); // Handle demo interactions
+
+  // Resume demo tour after page refresh in demo mode
+  useEffect(() => {
+    const isDemoMode = localStorage.getItem('demo-mode') === 'true';
+    const demoUserType = localStorage.getItem('demo-user-type');
+    
+    // Only resume demo if demo is not already active (to avoid loops)
+    if (isDemoMode && demoUserType && !demoState.isActive) {
+      console.log('Resuming demo after page refresh');
+      if (demoUserType === 'creator') {
+        setPhase('creator-tour');
+      } else if (demoUserType === 'sponsor') {
+        setPhase('sponsor-tour');
+      }
+    }
+  }, [demoState.isActive, setPhase]);
 
   if (!profile) {
     return (
@@ -48,7 +72,8 @@ export default function Dashboard() {
 
   return (
     <div className={`space-y-8 ${!isCreator ? 'sponsor-theme' : 'creator-theme'}`}>
-      <div>
+      <DemoOverlay />
+      <div data-demo="dashboard">
         <h1 className="text-3xl font-bold">{welcomeTitle}</h1>
         <p className="text-muted-foreground mt-2">
           Hello {profile.full_name}! {welcomeDescription}
@@ -80,7 +105,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Top Row - AI Profile and Quick Actions */}
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1" data-demo="ai-profile-score">
               <AIProfileScore />
             </div>
             <div className="lg:col-span-2 space-y-6">
@@ -97,19 +122,23 @@ export default function Dashboard() {
                       <Users className="mr-2 h-4 w-4" />
                       Complete Profile
                     </Button>
-                    <Button className="w-full" variant="outline" onClick={() => window.location.href = '/matches'}>
+                    <Button className="w-full" variant="outline" onClick={() => window.location.href = '/matches'} data-demo="ai-matches">
                       <Sparkles className="mr-2 h-4 w-4" />
                       AI Matches
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              <PerformanceChart />
+              <div data-demo="performance-growth">
+                <PerformanceChart />
+              </div>
             </div>
           </div>
 
           {/* Middle Row - Recommended Sponsors */}
-          <RecommendedSponsors />
+          <div data-demo="recommended-sponsors">
+            <RecommendedSponsors />
+          </div>
 
           {/* Bottom Row - Collaborations */}
           <CollaborationsManager />

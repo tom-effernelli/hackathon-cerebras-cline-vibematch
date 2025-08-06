@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemo } from '@/contexts/DemoContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +8,10 @@ import { ParticleBackground } from '@/components/landing/ParticleBackground';
 import { AnimatedTitle } from '@/components/landing/AnimatedTitle';
 import { InteractiveButton } from '@/components/landing/InteractiveButton';
 import { ParticleField } from '@/components/landing/ParticleField';
-import { Sparkles, Building2, Zap, Users, Target, BarChart3 } from 'lucide-react';
+import { DemoOverlay } from '@/components/demo/DemoOverlay';
+import { Sparkles, Building2, Zap, Users, Target, BarChart3, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useDemoAuth } from '@/hooks/useDemoAuth';
 
 const features = [
   {
@@ -35,6 +38,8 @@ const features = [
 
 const Index = () => {
   const { user } = useAuth();
+  const { startDemo, demoState } = useDemo();
+  useDemoAuth(); // Initialize demo auth handling
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -42,6 +47,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen immersive-bg relative overflow-hidden">
+      {/* Demo Overlay */}
+      <DemoOverlay />
+      
       {/* Animated Background Effects */}
       <ParticleBackground />
       {/* Header */}
@@ -96,13 +104,38 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5, duration: 0.8 }}
           >
-            <InteractiveButton href="/auth" variant="primary" className="text-lg px-8">
+            <InteractiveButton 
+              href={demoState.isActive && demoState.phase === 'landing' ? undefined : "/auth"}
+              variant="primary" 
+              className="text-lg px-8"
+              data-demo="creator-button"
+              onClick={demoState.isActive && demoState.phase === 'landing' ? (() => {
+                // Click detected in demo mode, proceed to next step
+                console.log('Creator button clicked in demo mode');
+              }) : undefined}
+            >
               <Sparkles className="mr-2 h-5 w-5" />
               Content Creator
             </InteractiveButton>
-            <InteractiveButton href="/auth" variant="secondary" className="text-lg px-8">
+            <InteractiveButton 
+              href={demoState.isActive && demoState.phase === 'transition' ? undefined : "/auth"} 
+              variant="secondary" 
+              className="text-lg px-8"
+              data-demo="brand-button"
+              onClick={demoState.isActive && demoState.phase === 'transition' ? (() => {
+                console.log('Brand button clicked in demo mode');
+              }) : undefined}
+            >
               <Building2 className="mr-2 h-5 w-5" />
               Sponsor / Brand
+            </InteractiveButton>
+            <InteractiveButton 
+              variant="demo" 
+              className="text-lg px-8"
+              onClick={startDemo}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Try Demo
             </InteractiveButton>
           </motion.div>
         </div>
@@ -289,8 +322,18 @@ const Index = () => {
         viewport={{ once: true }}
       >
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-white/60">
-            <p>&copy; 2024 VibeMatch. All rights reserved.</p>
+          <div className="text-center space-y-3">
+            <p className="text-white/60">&copy; 2025 VibeMatch. All rights reserved.</p>
+            <div className="text-white/40 text-sm max-w-4xl mx-auto leading-relaxed">
+              <p className="mb-2">
+                <strong>Demo Notice:</strong> This website is currently a demonstration platform. 
+                No contracts or partnerships have been established with any of the brands whose logos are displayed.
+              </p>
+              <p>
+                All brand logos and trademarks remain the exclusive intellectual property of their respective owners. 
+                Their use here is purely for demonstration purposes and does not imply any endorsement or affiliation.
+              </p>
+            </div>
           </div>
         </div>
       </motion.footer>

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth, UserType } from '@/hooks/useAuth';
+import { isDemoMode } from '@/data/demoData';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,13 +11,19 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredUserType, requireOnboarding = true }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth();
+  const demoMode = isDemoMode();
 
-  if (loading) {
+  if (loading && !demoMode) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // In demo mode, bypass all authentication checks
+  if (demoMode) {
+    return <>{children}</>;
   }
 
   if (!user) {
@@ -37,8 +44,6 @@ export function ProtectedRoute({ children, requiredUserType, requireOnboarding =
     // Redirect both creators and sponsors to dashboard
     return <Navigate to="/dashboard" replace />;
   }
-
-  // Allow creators to access dashboard directly
 
   return <>{children}</>;
 }

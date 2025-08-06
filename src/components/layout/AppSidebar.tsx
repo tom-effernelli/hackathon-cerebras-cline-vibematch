@@ -26,28 +26,28 @@ import {
 } from 'lucide-react';
 
 const creatorNavItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Home },
-  { title: 'AI Matches', url: '/matches', icon: Sparkles },
-  { title: 'My campaigns', url: '/campaigns', icon: Briefcase },
-  { title: 'All Campaigns', url: '/market', icon: Target },
-  { title: 'Profile', url: '/profile', icon: Users },
-  { title: 'Leaderboard', url: '/leaderboard', icon: Award },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
+  { title: 'Dashboard', url: '/dashboard', icon: Home, demoId: 'nav-dashboard' },
+  { title: 'AI Matches', url: '/matches', icon: Sparkles, demoId: 'nav-ai-matches' },
+  { title: 'My campaigns', url: '/campaigns', icon: Briefcase, demoId: 'nav-campaigns' },
+  { title: 'All Campaigns', url: '/market', icon: Target, demoId: 'nav-all-campaigns' },
+  { title: 'Profile', url: '/profile', icon: Users, demoId: 'nav-profile' },
+  { title: 'Leaderboard', url: '/leaderboard', icon: Award, demoId: 'nav-leaderboard' },
+  { title: 'Analytics', url: '/analytics', icon: BarChart3, demoId: 'nav-analytics' },
+  { title: 'Messages', url: '/messages', icon: MessageSquare, demoId: 'nav-messages' },
 ];
 
 const sponsorNavItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Home },
-  { title: 'Company', url: '/profile', icon: Building2 },
-  { title: 'Discover', url: '/discover', icon: UserPlus },
-  { title: 'AI Matches', url: '/matches', icon: Sparkles },
-  { title: 'Leaderboard', url: '/leaderboard', icon: Award },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
+  { title: 'Dashboard', url: '/dashboard', icon: Home, demoId: 'nav-dashboard' },
+  { title: 'Company', url: '/profile', icon: Building2, demoId: 'nav-company' },
+  { title: 'Discover', url: '/discover', icon: UserPlus, demoId: 'nav-discover' },
+  { title: 'AI Matches', url: '/matches', icon: Sparkles, demoId: 'nav-ai-matches' },
+  { title: 'Leaderboard', url: '/leaderboard', icon: Award, demoId: 'nav-leaderboard' },
+  { title: 'Analytics', url: '/analytics', icon: BarChart3, demoId: 'nav-analytics' },
+  { title: 'Messages', url: '/messages', icon: MessageSquare, demoId: 'nav-messages' },
 ];
 
 const commonItems = [
-  { title: 'Settings', url: '/settings', icon: Settings },
+  { title: 'Settings', url: '/settings', icon: Settings, demoId: 'nav-settings' },
 ];
 
 export function AppSidebar() {
@@ -61,7 +61,19 @@ export function AppSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground';
 
-  const navItems = profile?.user_type === 'creator' ? creatorNavItems : sponsorNavItems;
+  // Filter out creator-only items for sponsors
+  const getNavItems = () => {
+    if (profile?.user_type === 'creator') {
+      return creatorNavItems;
+    } else {
+      // Remove AI Matches and Leaderboards for sponsors
+      return sponsorNavItems.filter(item => 
+        !item.title.includes('AI Matches') && !item.title.includes('Leaderboard')
+      );
+    }
+  };
+  
+  const navItems = getNavItems();
   const userTypeLabel = profile?.user_type === 'creator' ? 'Creator' : 'Sponsor';
 
   return (
@@ -74,7 +86,7 @@ export function AppSidebar() {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
+                    <NavLink to={item.url} className={getNavCls} data-demo={item.demoId || undefined}>
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -91,7 +103,7 @@ export function AppSidebar() {
               {commonItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
+                    <NavLink to={item.url} className={getNavCls} data-demo={item.demoId || undefined}>
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>

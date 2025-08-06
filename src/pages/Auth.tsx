@@ -8,10 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Sparkles, Building2 } from 'lucide-react';
+import { useDemoAuth } from '@/hooks/useDemoAuth';
+import { useDemo } from '@/contexts/DemoContext';
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { isDemoMode } = useDemoAuth();
+  const { demoState } = useDemo();
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -24,6 +28,11 @@ export default function Auth() {
   const [userType, setUserType] = useState<UserType>('creator');
 
   if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // In demo mode, redirect immediately to dashboard
+  if (isDemoMode) {
     return <Navigate to="/dashboard" replace />;
   }
 

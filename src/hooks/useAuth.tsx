@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { isDemoMode, getDemoProfile } from '@/data/demoData';
 
 export type UserType = 'creator' | 'sponsor';
 
@@ -62,6 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      // Check if we're in demo mode
+      if (isDemoMode()) {
+        // Get demo profile based on current demo user type
+        const demoUserType = localStorage.getItem('demo-user-type') as 'creator' | 'sponsor' || 'creator';
+        const demoProfile = getDemoProfile(demoUserType);
+        setProfile(demoProfile);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -85,6 +95,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Check if we're in demo mode first
+    if (isDemoMode()) {
+      // In demo mode, create a fake user session
+      const demoUserType = localStorage.getItem('demo-user-type') as 'creator' | 'sponsor' || 'creator';
+      const demoProfile = getDemoProfile(demoUserType);
+      
+      // Create fake user object for demo
+      const fakeUser = {
+        id: demoProfile.user_id,
+        email: demoProfile.email,
+        created_at: demoProfile.created_at,
+        updated_at: demoProfile.updated_at,
+        app_metadata: {},
+        user_metadata: {}
+      } as any;
+      
+      setUser(fakeUser);
+      setProfile(demoProfile);
+      setLoading(false);
+      return;
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
